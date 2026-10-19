@@ -2,340 +2,394 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0756c9">
-<title>Mas Tolong — Ojek Serba Bisa</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0264c8">
+<title>Ojek Serba Bisa — Mas Tolong</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
 :root {
-  --primary-blue: #0264c8;
-  --bg-color: #f4f7fb;
-  --text-dark: #121e31;
-  --text-muted: #627285;
+  --blue-main: #0264c8;
+  --blue-dark: #014184;
+  --blue-light: #eef6ff;
+  --bg-app: #f4f7fb;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
   --card-border: #e2e8f0;
-  --active-blue: #0264c8;
+  --green-btn: #10b981;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-body { background: var(--bg-color); color: var(--text-dark); padding-bottom: 30px; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background: #111827; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
 
-header {
-  background: var(--primary-blue);
-  color: white;
-  padding: 16px 18px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+.phone-container {
+  width: 100%; max-width: 420px; height: 100vh; max-height: 880px; background: var(--bg-app);
+  position: relative; overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
 }
-.brand-title { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
-.brand-subtitle { font-size: 12px; opacity: 0.85; margin-top: 2px; }
-.services-tag { font-size: 12px; opacity: 0.9; margin-top: 8px; }
-.badge-cashless {
-  background: rgba(255,255,255,0.2);
-  padding: 6px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+@media (min-width: 430px) {
+  .phone-container { border-radius: 36px; height: 92vh; border: 8px solid #1f2937; }
 }
 
-main { max-width: 500px; margin: 0 auto; padding: 16px; }
-.section-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: #1e293b; }
+.screen { display: none; flex-direction: column; width: 100%; height: 100%; overflow-y: auto; position: absolute; top: 0; left: 0; background: var(--bg-app); padding-bottom: 70px; }
+.screen.active { display: flex; z-index: 10; }
 
-.services-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
+/* Splash Screen */
+#screen-splash {
+  background: linear-gradient(180deg, #0264c8 0%, #013773 100%);
+  color: white; justify-content: center; align-items: center; text-align: center; padding: 30px; z-index: 100;
 }
-.service-card {
-  background: white;
-  border: 1.5px solid var(--card-border);
-  border-radius: 16px;
-  padding: 14px;
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.service-card.active {
-  border-color: var(--active-blue);
-  background: #f0f7ff;
-}
-.service-icon {
-  width: 42px; height: 42px; border-radius: 12px; background: #f1f5f9;
-  display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 10px;
-}
-.service-card.active .service-icon { background: var(--primary-blue); color: white; }
-.service-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; color: #0f172a; }
-.service-desc { font-size: 12px; color: var(--text-muted); }
-.badge-extra {
-  position: absolute; top: 10px; right: 10px; background: #ff9800; color: white;
-  font-size: 10px; font-weight: 700; padding: 3px 6px; border-radius: 10px;
-}
+.splash-logo { width: 160px; height: 160px; margin-bottom: 20px; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3)); }
+.splash-title { font-size: 24px; font-weight: 900; }
+.splash-sub { font-size: 14px; opacity: 0.9; margin-top: 6px; }
+.splash-area { font-size: 12px; opacity: 0.8; margin-top: 30px; background: rgba(255,255,255,0.15); padding: 6px 16px; border-radius: 20px; }
 
-.map-box {
-  background: white; border-radius: 16px; padding: 8px; border: 1px solid var(--card-border);
-  margin-bottom: 16px; position: relative;
+/* App Header */
+.app-header {
+  background: white; padding: 14px 18px; border-bottom: 1px solid var(--card-border);
+  display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 20;
 }
-.map-instruction {
-  position: absolute; top: 16px; left: 16px; z-index: 1000;
-  background: rgba(255, 255, 255, 0.95); padding: 6px 12px; border-radius: 20px;
-  font-size: 12px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.1); color: #0264c8;
-}
-#map { height: 230px; border-radius: 12px; z-index: 1; }
+.header-brand { display: flex; align-items: center; gap: 10px; }
+.header-logo { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+.header-loc-title { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+.header-loc-val { font-size: 13px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 4px; }
 
-.quick-chips {
-  display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px; scrollbar-width: none;
+/* Promo Card */
+.promo-card {
+  background: linear-gradient(135deg, #0264c8, #0091ff); color: white; margin: 16px; padding: 16px;
+  border-radius: 16px; display: flex; justify-content: space-between; align-items: center;
+  box-shadow: 0 8px 16px rgba(2, 100, 200, 0.25);
 }
-.quick-chips::-webkit-scrollbar { display: none; }
-.chip {
-  background: #eef4fb; color: #334155; padding: 8px 14px; border-radius: 20px;
-  font-size: 13px; font-weight: 500; white-space: nowrap; border: 1px solid #dce6f2; cursor: pointer;
-}
+.promo-badge { background: #facc15; color: #854d0e; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
 
-.form-group { margin-bottom: 14px; }
-.form-label {
-  font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;
-  display: flex; align-items: center; justify-content: space-between;
+/* Services Grid */
+.services-grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 16px 16px; }
+.svc-box {
+  background: white; border: 1.5px solid var(--card-border); border-radius: 16px; padding: 16px;
+  display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: 0.2s;
 }
-.input-row { display: flex; gap: 8px; }
-.form-input {
-  width: 100%; padding: 13px 16px; border-radius: 12px; border: 1px solid #cbd5e1;
-  background: white; font-size: 14px; outline: none;
-}
-.form-input:focus { border-color: var(--primary-blue); }
-.btn-action {
-  background: #eef4fb; border: 1px solid #cbd5e1; border-radius: 12px; padding: 0 14px;
-  font-size: 16px; cursor: pointer; color: var(--primary-blue); font-weight: bold;
-}
+.svc-box:active { transform: scale(0.97); border-color: var(--blue-main); }
+.svc-icon-wrap { width: 54px; height: 54px; border-radius: 14px; background: var(--blue-light); display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 10px; }
+.svc-title { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+.svc-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-.tariff-card {
-  background: #111827; color: white; border-radius: 20px; padding: 18px 20px;
-  margin-top: 20px; margin-bottom: 16px; box-shadow: 0 10px 25px -5px rgba(17, 24, 39, 0.3);
-}
-.tariff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.tariff-label { font-size: 12px; color: #9ca3af; }
-.service-badge-dark { background: #1f2937; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; color: #d1d5db; }
-.tariff-price { font-size: 32px; font-weight: 800; margin-bottom: 10px; color: #ffffff; }
-.tariff-footer { display: flex; justify-content: space-between; font-size: 12px; color: #9ca3af; border-top: 1px solid #1f2937; padding-top: 10px; }
+/* Map & Location Inputs */
+.map-control-panel { background: white; padding: 12px 16px; border-bottom: 1px solid var(--card-border); }
+.input-loc-group { background: var(--bg-app); border-radius: 12px; padding: 8px 12px; margin-bottom: 8px; border: 1px solid var(--card-border); display: flex; align-items: center; gap: 10px; }
+.input-loc-dot { width: 10px; height: 10px; border-radius: 50%; }
+.input-loc-dot.green { background: #10b981; }
+.input-loc-dot.red { background: #ef4444; }
+.input-loc-field { border: none; background: transparent; width: 100%; font-size: 13px; font-weight: 600; outline: none; }
+.btn-search-map { background: #e0f2fe; border: 1px solid #bae6fd; color: #0284c7; border-radius: 8px; padding: 6px 12px; font-size: 11px; font-weight: 700; cursor: pointer; }
 
-.btn-order {
-  width: 100%; background: #f6c38b; color: #ffffff; border: none; padding: 16px;
-  border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  box-shadow: 0 4px 14px rgba(246, 195, 139, 0.4);
+#map { height: 260px; width: 100%; }
+
+/* Sheet Info */
+.order-sheet { background: white; padding: 18px; border-radius: 20px 20px 0 0; margin-top: -16px; position: relative; z-index: 15; box-shadow: 0 -6px 20px rgba(0,0,0,0.06); }
+.fare-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: var(--text-muted); }
+.fare-total { font-size: 18px; font-weight: 800; color: var(--text-dark); border-top: 1px dashed var(--card-border); padding-top: 10px; margin-top: 8px; display: flex; justify-content: space-between; }
+
+/* Status Cards & Profil */
+.status-card { background: white; margin: 16px; padding: 18px; border-radius: 16px; border: 1px solid var(--card-border); }
+.driver-profile { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.driver-avatar { width: 48px; height: 48px; border-radius: 50%; background: #e2e8f0; }
+.profile-header { background: white; padding: 24px; text-align: center; border-bottom: 1px solid var(--card-border); }
+.profile-avatar { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 10px; border: 3px solid var(--blue-main); }
+
+/* Buttons */
+.btn-primary { width: 100%; background: var(--blue-main); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; text-align: center; }
+.btn-green { background: var(--green-btn); }
+
+/* Bottom Nav */
+.bottom-nav {
+  position: absolute; bottom: 0; left: 0; width: 100%; height: 62px; background: white;
+  border-top: 1px solid var(--card-border); display: flex; justify-content: space-around; align-items: center; z-index: 30;
 }
+.nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 10px; font-weight: 600; cursor: pointer; }
+.nav-item.active { color: var(--blue-main); }
+.nav-icon { font-size: 20px; margin-bottom: 2px; }
+
+/* Custom Markers */
+.pin-marker { width: 26px; height: 26px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; border: 2px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.25); }
+.pin-green { background: #10b981; }
+.pin-red { background: #ef4444; }
 </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <div class="brand-title">📍 Mas Tolong</div>
-    <div class="brand-subtitle">Kertosono · Jombang</div>
-    <div class="services-tag">Ojek · Paket · Jastip Kuliner · Belanja Pasar</div>
-  </div>
-  <div class="badge-cashless">🛡️ 100% Cashless</div>
-</header>
+<div class="phone-container">
 
-<main>
-  <div class="section-title">Pilih Layanan</div>
-  <div class="services-grid">
-    <div class="service-card active" onclick="selectService(this, 'Antar Jemput', 0)">
-      <div class="service-icon">🛵</div>
-      <div class="service-name">Antar Jemput</div>
-      <div class="service-desc">Ojek antar jemput penumpang</div>
-    </div>
-    <div class="service-card" onclick="selectService(this, 'Kirim Paket', 0)">
-      <div class="service-icon">📦</div>
-      <div class="service-name">Kirim Paket</div>
-      <div class="service-desc">Antar barang / paket</div>
-    </div>
-    <div class="service-card" onclick="selectService(this, 'Jastip Kuliner', 0)">
-      <div class="service-icon">🍽️</div>
-      <div class="service-name">Jastip Kuliner</div>
-      <div class="service-desc">Jasa titip beli makanan</div>
-    </div>
-    <div class="service-card" onclick="selectService(this, 'Belanja Pasar', 3000)">
-      <span class="badge-extra">+Rp 3.000</span>
-      <div class="service-icon">🛍️</div>
-      <div class="service-name">Belanja Pasar</div>
-      <div class="service-desc">Belanja kebutuhan pasar</div>
-    </div>
+  <!-- 1. SPLASH SCREEN -->
+  <div class="screen active" id="screen-splash" onclick="showScreen('screen-home')">
+    <img src="https://lh3.googleusercontent.com/d/1000542339.png" class="splash-logo" alt="Mas Tolong Logo">
+    <div class="splash-title">OJEK SERBA BISA</div>
+    <div style="font-size: 16px; font-weight: 700; color: #93c5fd;">— Mas Tolong —</div>
+    <div class="splash-sub">Cepat · Aman · Terpercaya</div>
+    <div class="splash-area">Cakupan Wilayah Nasional Indonesia</div>
   </div>
 
-  <div class="map-box">
-    <div class="map-instruction" id="mapStatus">Sesuai Rute Jalan Raya Riil</div>
+  <!-- 2. BERANDA -->
+  <div class="screen" id="screen-home">
+    <div class="app-header">
+      <div class="header-brand">
+        <img src="https://lh3.googleusercontent.com/d/1000542339.png" class="header-logo" alt="Logo">
+        <div>
+          <div class="header-loc-title">Layanan Aktif</div>
+          <div class="header-loc-val">📍 Seluruh Indonesia</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="promo-card">
+      <div>
+        <span class="promo-badge">Diskon Spesial</span>
+        <div style="font-size: 16px; font-weight: 800; margin-top: 4px;">Pengguna Baru</div>
+        <div style="font-size: 11px; opacity: 0.9; margin-top: 2px;">Gunakan Kode: <b>MAS10</b></div>
+      </div>
+      <div style="font-size: 36px;">🛵</div>
+    </div>
+
+    <div style="padding: 0 16px 10px; font-weight: 800; font-size: 15px;">Pilih Layanan Utama</div>
+
+    <div class="services-grid-4">
+      <div class="svc-box" onclick="openMapService('Ojek')">
+        <div class="svc-icon-wrap">🛵</div>
+        <div class="svc-title">Ojek</div>
+        <div class="svc-desc">Antar jemput cepat</div>
+      </div>
+      <div class="svc-box" onclick="openMapService('Paket')">
+        <div class="svc-icon-wrap">📦</div>
+        <div class="svc-title">Paket</div>
+        <div class="svc-desc">Kirim barang / dokumen</div>
+      </div>
+      <div class="svc-box" onclick="openMapService('Makanan')">
+        <div class="svc-icon-wrap">🍽️</div>
+        <div class="svc-title">Makanan</div>
+        <div class="svc-desc">Jastip kuliner favorit</div>
+      </div>
+      <div class="svc-box" onclick="openMapService('Belanja')">
+        <div class="svc-icon-wrap">🛒</div>
+        <div class="svc-title">Belanja</div>
+        <div class="svc-desc">Titip belanja pasar (+Rp3rb)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. PETA NASIONAL & CARI LOKASI RIIL -->
+  <div class="screen" id="screen-map">
+    <div class="app-header">
+      <div style="font-weight: 800; font-size: 15px;">Pilih Rute Riil Nasional</div>
+      <button class="btn-search-map" onclick="searchLocations()">Cari Alamat 🔍</button>
+    </div>
+    
+    <div class="map-control-panel">
+      <div class="input-loc-group">
+        <div class="input-loc-dot green"></div>
+        <input type="text" class="input-loc-field" id="pickupInput" value="Stasiun Kertosono" placeholder="Lokasi jemput...">
+      </div>
+      <div class="input-loc-group">
+        <div class="input-loc-dot red"></div>
+        <input type="text" class="input-loc-field" id="destInput" value="Alun-Alun Jombang" placeholder="Lokasi tujuan...">
+      </div>
+    </div>
+
     <div id="map"></div>
-  </div>
 
-  <div class="quick-chips">
-    <div class="chip" onclick="setQuickPickup('Stasiun Kertosono')">🚂 Stasiun Kertosono</div>
-    <div class="chip" onclick="setQuickPickup('Alun-alun Kertosono')">🌳 Alun-alun Kertosono</div>
-    <div class="chip" onclick="setQuickPickup('Pasar Kertosono')">🛒 Pasar Kertosono</div>
-    <div class="chip" onclick="setQuickPickup('Bandar Kedungmulyo, Jombang')">📍 Bandar Kedungmulyo</div>
-  </div>
-
-  <div class="form-group">
-    <div class="form-label">Nama Anda</div>
-    <input type="text" class="form-input" id="custName" placeholder="cth: Rina">
-  </div>
-
-  <div class="form-group">
-    <div class="form-label"><span>📍 Lokasi Jemput</span></div>
-    <div class="input-row">
-      <input type="text" class="form-input" id="pickupLoc" placeholder="Ketik lokasi jemput (cth: Stasiun Kertosono)">
-      <button class="btn-action" onclick="searchAndRoute('pickup')" title="Cari Lokasi">🔍</button>
+    <div class="order-sheet">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div>
+          <span style="font-weight: 800; font-size: 16px;" id="sheetSvcTitle">Ojek Ride</span>
+          <div style="font-size:12px; color:var(--text-muted);" id="sheetKmText">Menghitung rute...</div>
+        </div>
+        <div style="font-weight: 800; font-size: 20px; color:var(--blue-main);" id="sheetPriceDisplay">Rp 6.000</div>
+      </div>
+      <button class="btn-primary" onclick="showScreen('screen-detail')">Lanjutkan Pesanan</button>
     </div>
   </div>
 
-  <div class="form-group">
-    <div class="form-label"><span>🎯 Tujuan</span></div>
-    <div class="input-row">
-      <input type="text" class="form-input" id="destLoc" placeholder="Ketik tujuan (cth: Alun-alun Jombang)">
-      <button class="btn-action" onclick="searchAndRoute('destination')" title="Cari Lokasi">🔍</button>
+  <!-- 4. DETAIL PESANAN -->
+  <div class="screen" id="screen-detail">
+    <div class="app-header"><div style="font-weight: 800; font-size: 16px;">Rincian Pembayaran</div></div>
+    <div style="padding: 16px;">
+      <div class="status-card" style="margin:0 0 16px 0;">
+        <div class="fare-row"><span>Layanan</span><b id="detailSvc">Ojek Ride</b></div>
+        <div class="fare-row"><span>Jarak Riil Jalan</span><b id="detailKmVal">0 km</b></div>
+        <hr style="border:none; border-top:1px solid #e2e8f0; margin:10px 0;">
+        <div class="fare-row"><span>Tarif Dasar (≤3 km)</span><span>Rp 6.000</span></div>
+        <div class="fare-row" id="extraKmRow" style="display:none;"><span>Kilometer Berikutnya</span><span id="extraKmCost">Rp 0</span></div>
+        <div class="fare-row" id="jastipRow" style="display:none;"><span>Biaya Jastip Pasar</span><span>Rp 3.000</span></div>
+        <div class="fare-total"><span>Total Estimasi</span><span style="color:var(--blue-main);" id="detailTotalVal">Rp 6.000</span></div>
+      </div>
+      <button class="btn-primary btn-green" onclick="showScreen('screen-confirm')">Konfirmasi & Pesan</button>
     </div>
   </div>
 
-  <!-- Kartu Estimasi Tarif Gelap -->
-  <div class="tariff-card">
-    <div class="tariff-header">
-      <span class="tariff-label">Estimasi Tarif Riil</span>
-      <span class="service-badge-dark" id="badgeServiceLabel">Antar Jemput</span>
+  <!-- 5. KONFIRMASI -->
+  <div class="screen" id="screen-confirm" style="text-align:center; justify-content:center; padding:30px;">
+    <div style="width:70px; height:70px; background:#dcfce7; color:#16a34a; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:36px; margin:0 auto 16px;">✓</div>
+    <div style="font-size: 20px; font-weight: 800;">Pesanan Berhasil Dibuat</div>
+    <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">ID Pesanan: <b>#MT-NAT2026</b></div>
+    <div style="background:#f0f9ff; border:1px solid #bae6fd; padding:12px; border-radius:12px; font-size:13px; color:#0369a1; margin:20px 0;">
+      🛵 Driver terdekat sedang mencarikan rute penjemputan...
     </div>
-    <div class="tariff-price" id="totalPriceDisplay">Rp 6.000</div>
-    <div class="tariff-footer">
-      <span id="routeInfoText">Menunggu lokasi & rute jalan...</span>
-      <span id="kmDetailDisplay">0.0 km</span>
+    <button class="btn-primary" onclick="showScreen('screen-status')">Pantau Perjalanan</button>
+  </div>
+
+  <!-- 6. STATUS PERJALANAN -->
+  <div class="screen" id="screen-status">
+    <div class="app-header"><div style="font-weight:800;">Status Driver</div></div>
+    <div class="status-card">
+      <div class="driver-profile">
+        <div class="driver-avatar" style="background:url('https://i.pravatar.cc/100?img=12') center/cover;"></div>
+        <div>
+          <div style="font-weight:800; font-size:15px;">Ahmad Driver</div>
+          <div style="font-size:12px; color:var(--text-muted);">⭐ 4.9 · Suzuki Shogun R</div>
+        </div>
+      </div>
+      <div style="font-size:13px; line-height:1.8;">
+        ✅ Driver menerima pesanan<br>
+        📍 Menuju lokasi penjemputan<br>
+        🚗 Perjalanan aktif
+      </div>
+      <button class="btn-primary btn-green" style="margin-top:16px;" onclick="showScreen('screen-home')">Selesai / Pesanan Baru</button>
     </div>
   </div>
 
-  <button class="btn-order" onclick="submitOrder()">✨ Pesan Sekarang</button>
-</main>
+  <!-- 8. RIWAYAT -->
+  <div class="screen" id="screen-history">
+    <div class="app-header"><div style="font-weight:800;">Riwayat Pesanan</div></div>
+    <div style="padding:16px;" id="historyList">
+      <div class="status-card" style="margin:0; padding:14px;">
+        <div style="display:flex; justify-content:space-between; font-weight:800; font-size:14px;">
+          <span>🛵 Ojek</span><span style="color:#16a34a;">Selesai</span>
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); margin:4px 0;">Stasiun Kertosono → Alun-Alun</div>
+        <div style="font-weight:800; font-size:14px; color:var(--blue-main);" id="historyPrice">Rp 6.000</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. PROFIL -->
+  <div class="screen" id="screen-profile">
+    <div class="profile-header">
+      <div class="profile-avatar" style="background:url('https://i.pravatar.cc/100?img=33') center/cover;"></div>
+      <div style="font-weight:800; font-size:18px;">Pengguna Mas Tolong</div>
+      <div style="font-size:13px; color:var(--text-muted);">+62 812-xxxx-xxxx</div>
+    </div>
+    <div style="padding:16px;">
+      <button class="btn-primary" style="background:#ef4444;" onclick="showScreen('screen-splash')">Keluar Aplikasi</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="switchNav(this, 'screen-home')"><div class="nav-icon">🏠</div><div>Beranda</div></div>
+    <div class="nav-item" onclick="switchNav(this, 'screen-history')"><div class="nav-icon">📄</div><div>Pesanan</div></div>
+    <div class="nav-item" onclick="alert('Layanan chat aktif!')"><div class="nav-icon">💬</div><div>Chat</div></div>
+    <div class="nav-item" onclick="switchNav(this, 'screen-profile')"><div class="nav-icon">👤</div><div>Profil</div></div>
+  </nav>
+
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-let currentService = "Antar Jemput";
-let extraFee = 0;
-let routeKm = 0;
-let startCoords = null;
-let endCoords = null;
-let startMarker = null;
-let endMarker = null;
-let routeLine = null;
+let currentService = "Ojek";
+let map, startMarker, endMarker, routeLine;
+let startCoords = [-7.601, 112.113];
+let endCoords = [-7.553, 112.234];
+let routeKm = 3.0;
 
-// Inisialisasi Peta berpusat di Kertosono/Jombang
-const map = L.map('map').setView([-7.60, 112.10], 11);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '© OpenStreetMap contributors'
-}).addTo(map);
-
-function selectService(element, serviceName, fee) {
-  document.querySelectorAll('.service-card').forEach(c => c.classList.remove('active'));
-  element.classList.add('active');
-  currentService = serviceName;
-  extraFee = fee;
-  document.getElementById('badgeServiceLabel').textContent = serviceName;
-  updateFareDisplay();
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-function setQuickPickup(loc) {
-  document.getElementById('pickupLoc').value = loc;
-  searchAndRoute('pickup');
+function switchNav(el, screenId) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  showScreen(screenId);
 }
 
-async function geocodeAddress(query) {
+function openMapService(svc) {
+  currentService = svc;
+  document.getElementById('sheetSvcTitle').textContent = svc + (svc === 'Ojek' ? ' Ride' : '');
+  document.getElementById('detailSvc').textContent = svc + (svc === 'Ojek' ? ' Ride' : '');
+  showScreen('screen-map');
+  setTimeout(initMap, 250);
+}
+
+function initMap() {
+  if (!map) {
+    map = L.map('map').setView([-2.5489, 118.0149], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+    startMarker = L.marker(startCoords, { draggable: true, icon: L.divIcon({ className: 'pin-marker pin-green', html: 'J' }) }).addTo(map);
+    endMarker = L.marker(endCoords, { draggable: true, icon: L.divIcon({ className: 'pin-marker pin-red', html: 'T' }) }).addTo(map);
+
+    startMarker.on('dragend', e => { startCoords = [e.target.getLatLng().lat, e.target.getLatLng().lng]; calculateRoute(); });
+    endMarker.on('dragend', e => { endCoords = [e.target.getLatLng().lat, e.target.getLatLng().lng]; calculateRoute(); });
+  }
+  searchLocations();
+}
+
+async function geocode(query) {
   try {
-    let q = query;
-    if (!q.toLowerCase().includes("jawa timur") && !q.toLowerCase().includes("indonesia")) {
-      q += ", Jombang, Jawa Timur, Indonesia";
-    }
-    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
+    let q = query.toLowerCase().includes("indonesia") ? query : query + ", Indonesia";
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=id&q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    if (data && data.length > 0) return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+  } catch(e) {}
+  return null;
+}
+
+async function searchLocations() {
+  const pVal = document.getElementById('pickupInput').value;
+  const dVal = document.getElementById('destInput').value;
+
+  const pCoord = await geocode(pVal);
+  if (pCoord) { startCoords = pCoord; startMarker.setLatLng(startCoords); }
+
+  const dCoord = await geocode(dVal);
+  if (dCoord) { endCoords = dCoord; endMarker.setLatLng(endCoords); }
+
+  calculateRoute();
+}
+
+async function calculateRoute() {
+  const url = `https://router.project-osrm.org/route/v1/driving/${startCoords[1]},${startCoords[0]};${endCoords[1]},${endCoords[0]}?overview=full&geometries=geojson`;
+  try {
     const res = await fetch(url);
     const data = await res.json();
-    if (data && data.length > 0) {
-      return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+    if (data.code === "Ok" && data.routes && data.routes.length) {
+      routeKm = data.routes[0].distance / 1000;
+      if (routeLine) map.removeLayer(routeLine);
+      routeLine = L.geoJSON(data.routes[0].geometry, { style: { color: '#0264c8', weight: 5 } }).addTo(map);
+      map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+      updateFare();
     }
-    return null;
-  } catch (err) {
-    return null;
+  } catch(e) {
+    updateFare();
   }
 }
 
-async function searchAndRoute(type) {
-  const pickupVal = document.getElementById('pickupLoc').value.trim();
-  const destVal = document.getElementById('destLoc').value.trim();
-
-  if (type === 'pickup' && pickupVal) {
-    document.getElementById('mapStatus').textContent = "Mencari titik jemput...";
-    startCoords = await geocodeAddress(pickupVal);
-    if (startCoords) {
-      if (startMarker) map.removeLayer(startMarker);
-      startMarker = L.marker(startCoords).addTo(map).bindPopup("Jemput: " + pickupVal);
-      map.setView(startCoords, 13);
-    }
-  }
-
-  if (type === 'destination' && destVal) {
-    document.getElementById('mapStatus').textContent = "Mencari titik tujuan...";
-    endCoords = await geocodeAddress(destVal);
-    if (endCoords) {
-      if (endMarker) map.removeLayer(endMarker);
-      endMarker = L.marker(endCoords).addTo(map).bindPopup("Tujuan: " + destVal);
-    }
-  }
-
-  // Jika kedua titik sudah ada, tarik rute jalan raya riil via OSRM
-  if (startCoords && endCoords) {
-    document.getElementById('mapStatus').textContent = "Menghitung rute jalan raya...";
-    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${startCoords[1]},${startCoords[0]};${endCoords[1]},${endCoords[0]}?overview=full&geometries=geojson`;
-    
-    try {
-      const res = await fetch(osrmUrl);
-      const data = await res.json();
-      if (data.code === "Ok" && data.routes && data.routes.length > 0) {
-        const route = data.routes[0];
-        routeKm = route.distance / 1000; // konversi ke kilometer jalan raya
-        
-        if (routeLine) map.removeLayer(routeLine);
-        routeLine = L.geoJSON(route.geometry, { style: { color: '#0264c8', weight: 5, opacity: 0.8 } }).addTo(map);
-        map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
-
-        document.getElementById('mapStatus').textContent = "Rute jalan riil berhasil!";
-        document.getElementById('routeInfoText').textContent = `Jalur jalan raya riil`;
-        updateFareDisplay();
-      }
-    } catch (e) {
-      document.getElementById('mapStatus').textContent = "Gagal memuat rute jalan.";
-    }
-  }
-}
-
-function updateFareDisplay() {
+function updateFare() {
   let total = 6000;
+  let extraCost = 0;
   if (routeKm > 3) {
-    total += Math.ceil(routeKm - 3) * 2500;
+    extraCost = Math.ceil(routeKm - 3) * 2500;
+    total += extraCost;
   }
-  total += extraFee;
+  if (currentService === 'Belanja') total += 3000;
 
-  document.getElementById('totalPriceDisplay').textContent = "Rp " + total.toLocaleString('id-ID');
-  document.getElementById('kmDetailDisplay').textContent = `${routeKm.toFixed(1)} km`;
-}
+  const fmt = "Rp " + Math.round(total).toLocaleString('id-ID');
+  document.getElementById('sheetPriceDisplay').textContent = fmt;
+  document.getElementById('detailTotalVal').textContent = fmt;
+  document.getElementById('historyPrice').textContent = fmt;
+  document.getElementById('sheetKmText').textContent = `${routeKm.toFixed(1)} km · Rute riil jalan`;
+  document.getElementById('detailKmVal').textContent = `${routeKm.toFixed(1)} km`;
 
-function submitOrder() {
-  const name = document.getElementById('custName').value.trim();
-  const pickup = document.getElementById('pickupLoc').value.trim();
-  const dest = document.getElementById('destLoc').value.trim();
-
-  if (!name || !pickup || !dest) {
-    alert("Mohon lengkapi Nama, Lokasi Jemput, dan Tujuan terlebih dahulu.");
-    return;
-  }
-
-  alert(`Pesanan Berhasil dibuat!\n\nNama: ${name}\nLayanan: ${currentService}\nJemput: ${pickup}\nTujuan: ${dest}\nJarak Rute Riil: ${routeKm.toFixed(1)} km\nTotal Tarif: ${document.getElementById('totalPriceDisplay').textContent}`);
+  document.getElementById('extraKmRow').style.display = routeKm > 3 ? 'flex' : 'none';
+  document.getElementById('extraKmCost').textContent = "Rp " + extraCost.toLocaleString('id-ID');
+  document.getElementById('jastipRow').style.display = currentService === 'Belanja' ? 'flex' : 'none';
 }
 </script>
 </body>
