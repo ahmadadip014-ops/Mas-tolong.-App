@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0756c9">
+  <title>Mas Tolong — Ojek Serba Bisa</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:#f2f6fc;color:#17243a}
+    header{background:#0756c9;color:white;padding:24px 18px;border-radius:0 0 22px 22px}
+    header h1{margin:0;font-size:25px}
+    header p{margin:8px 0 0}
+    main{max-width:600px;margin:auto;padding:16px}
+    .card{background:white;padding:18px;border-radius:16px;margin-bottom:15px;box-shadow:0 3px 14px #17243a12}
+    h2{font-size:18px;margin-top:0}
+    label{display:block;font-weight:bold;font-size:14px;margin:12px 0 6px}
+    input,select{width:100%;padding:12px;border:1px solid #ccd5e3;border-radius:9px;font-size:15px;background:white}
+    button{border:0;border-radius:10px;padding:13px;background:#0756c9;color:white;font-size:15px;font-weight:bold;cursor:pointer}
+    .services{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .service{background:#eaf2ff;color:#0756c9;padding:16px 8px;text-align:center;border:1px solid #d7e6ff}
+    .service.active{background:#0756c9;color:white}
+    .full{width:100%;margin-top:14px}
+    .muted{font-size:13px;color:#64748b;line-height:1.6}
+    .price{font-size:26px;font-weight:bold;color:#0756c9;margin:8px 0}
+    #map{height:220px;border-radius:12px;background:#e5edf8;display:flex;align-items:center;justify-content:center;text-align:center;padding:18px;color:#536782}
+    footer{text-align:center;padding:18px;color:#64748b;font-size:12px}
+    #result{white-space:pre-line;line-height:1.6}
+  </style>
+</head>
+<body>
+<header>
+  <h1>🛵 MAS TOLONG</h1>
+  <p>Ojek Serba Bisa — Solusi Cepat, Aman, dan Terpercaya.</p>
+  <p>Kertosono • Jombang • Sekitarnya</p>
+</header>
+<main>
+  <section class="card">
+    <h2>Pilih layanan</h2>
+    <div class="services">
+      <button class="service active" data-service="Ojek">🛵 Ojek</button>
+      <button class="service" data-service="Paket">📦 Kirim Paket</button>
+      <button class="service" data-service="Kuliner">🍜 Kuliner / Jastip</button>
+      <button class="service" data-service="Belanja">🛒 Belanja</button>
+    </div>
+    <label for="pickup">Lokasi penjemputan</label>
+    <input id="pickup" placeholder="Masukkan alamat penjemputan">
+    <label for="destination">Tujuan / alamat pesanan</label>
+    <input id="destination" placeholder="Masukkan alamat tujuan">
+    <label for="distance">Jarak rute (km)</label>
+    <input id="distance" type="number" min="0" step="0.1" placeholder="Masukkan jarak rute yang diketahui">
+    <p class="muted">Tarif di bawah merupakan perkiraan berdasarkan jarak yang Anda masukkan, bukan hasil perhitungan peta otomatis.</p>
+    <div class="price" id="price">Rp6.000</div>
+    <p class="muted" id="priceInfo">Tarif dasar untuk jarak sampai dengan 3 km.</p>
+    <button class="full" id="calculate">Hitung perkiraan tarif</button>
+    <button class="full" id="book">Buat pesanan DEMO</button>
+  </section>
+  <section class="card">
+    <h2>Peta dan navigasi</h2>
+    <div id="map">Peta belum terhubung.<br>Alamat dan rute belum diverifikasi.</div>
+    <button class="full" id="navigate">Buka Google Maps</button>
+    <p class="muted">Google Maps akan dibuka untuk mencari alamat tujuan. Jarak rute otomatis belum tersedia pada versi awal ini.</p>
+  </section>
+  <section class="card">
+    <h2>Status pesanan demo</h2>
+    <div id="result">Belum ada pesanan demo.</div>
+    <p class="muted">Demo ini belum mengirim pesanan kepada driver dan tidak memproses pembayaran.</p>
+  </section>
+  <section class="card">
+    <h2>Tentang Mas Tolong</h2>
+    <p><b>Didirikan oleh AHMAD ADIP</b></p>
+    <p class="muted">Dusun Bandar RT 01 RW 02, Desa/Kecamatan Bandar Kedungmulyo, Jombang, Jawa Timur.</p>
+    <p class="muted">Visi: Menjadi layanan transportasi dan jasa harian lokal yang terpercaya, mudah dijangkau, cepat, dan bermanfaat bagi masyarakat Kertosono, Jombang, dan sekitarnya.</p>
+  </section>
+</main>
+<footer>Mas Tolong © 2026 • Versi awal demonstrasi</footer>
+<script>
+let service="Ojek";
+document.querySelectorAll(".service").forEach(button=>{
+  button.addEventListener("click",()=>{
+    document.querySelectorAll(".service").forEach(b=>b.classList.remove("active"));
+    button.classList.add("active");
+    service=button.dataset.service;
+    calculate();
+  });
+});
+function rupiah(n){return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n)}
+function calculate(){
+  const d=Number(document.getElementById("distance").value)||0;
+  const travel=6000+Math.ceil(Math.max(0,d-3))*2500;
+  const extra=["Kuliner","Belanja"].includes(service)?3000:0;
+  document.getElementById("price").textContent=rupiah(travel+extra);
+  document.getElementById("priceInfo").textContent=
+    "Tarif perjalanan "+rupiah(travel)+(extra?" + biaya jasa "+rupiah(extra):"")+". Harga barang belum termasuk.";
+}
+document.getElementById("calculate").addEventListener("click",calculate);
+document.getElementById("distance").addEventListener("input",calculate);
+document.getElementById("book").addEventListener("click",()=>{
+  const pickup=document.getElementById("pickup").value.trim();
+  const destination=document.getElementById("destination").value.trim();
+  if(!pickup||!destination){
+    alert("Isi lokasi penjemputan dan tujuan terlebih dahulu.");
+    return;
+  }
+  document.getElementById("result").textContent=
+    "DEMO — belum dikirim ke driver\nLayanan: "+service+
+    "\nPenjemputan: "+pickup+"\nTujuan: "+destination+
+    "\nPerkiraan tarif: "+document.getElementById("price").textContent+
+    "\nStatus: Simulasi lokal";
+});
+document.getElementById("navigate").addEventListener("click",()=>{
+  const destination=document.getElementById("destination").value.trim();
+  if(!destination){alert("Masukkan alamat tujuan terlebih dahulu.");return;}
+  window.open("https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(destination)+"&travelmode=driving","_blank");
+});
+calculate();
+</script>
+</body>
+</html>
