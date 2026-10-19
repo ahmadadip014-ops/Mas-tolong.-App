@@ -1,222 +1,342 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0756c9">
 <title>Mas Tolong — Ojek Serba Bisa</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-:root{--blue:#0756c9;--pale:#edf4ff;--ink:#17243a;--muted:#69788d}
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f2f6fc;color:var(--ink)}
-header{background:var(--blue);color:white;padding:20px 17px 24px;border-radius:0 0 25px 25px}
-.brand{font-size:24px;font-weight:800}header p{margin:8px 0 0;line-height:1.5}
-main{max-width:700px;margin:auto;padding:14px}
-.card{background:white;padding:17px;border-radius:20px;margin-bottom:14px;box-shadow:0 4px 20px #17243a0d}
-h2{font-size:19px;margin:0 0 14px}
-.services{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-button,input{font:inherit}
-.service{border:1px solid #d6e3f6;background:#f1f6ff;color:#0756c9;border-radius:13px;padding:14px 5px;font-weight:bold}
-.service.active,button.primary{background:var(--blue);color:white}
-label{display:block;font-weight:bold;font-size:14px;margin:14px 0 7px}
-input{width:100%;padding:13px;border:1px solid #ccd6e5;border-radius:12px;background:white;color:#17243a}
-button.primary{border:0;border-radius:12px;padding:14px;width:100%;font-weight:bold;margin-top:12px}
-button.secondary{border:1px solid #ccd6e5;background:white;color:#0756c9;border-radius:10px;padding:11px}
-.row{display:flex;gap:8px;align-items:center}.row input{min-width:0}
-#map{height:300px;border-radius:15px;background:#e4edf8;z-index:1}
-.muted{font-size:13px;color:var(--muted);line-height:1.5}
-.price{font-size:31px;font-weight:800;color:var(--blue);margin:12px 0}
-.pill{display:inline-block;background:#e8f2ff;color:#0756c9;padding:6px 10px;border-radius:20px;font-size:12px}
-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
-nav button{padding:11px 2px;border:1px solid #d6e3f6;border-radius:11px;background:white;color:#0756c9}
-nav button.active{background:var(--blue);color:white}
-.hidden{display:none!important}
-.order{border:1px solid #e1e8f2;border-radius:12px;padding:12px;margin:9px 0}
-footer{text-align:center;color:var(--muted);padding:18px;font-size:12px}
+:root {
+  --primary-blue: #0264c8;
+  --bg-color: #f4f7fb;
+  --text-dark: #121e31;
+  --text-muted: #627285;
+  --card-border: #e2e8f0;
+  --active-blue: #0264c8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+body { background: var(--bg-color); color: var(--text-dark); padding-bottom: 30px; }
+
+header {
+  background: var(--primary-blue);
+  color: white;
+  padding: 16px 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.brand-title { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+.brand-subtitle { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+.services-tag { font-size: 12px; opacity: 0.9; margin-top: 8px; }
+.badge-cashless {
+  background: rgba(255,255,255,0.2);
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+main { max-width: 500px; margin: 0 auto; padding: 16px; }
+.section-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: #1e293b; }
+
+.services-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.service-card {
+  background: white;
+  border: 1.5px solid var(--card-border);
+  border-radius: 16px;
+  padding: 14px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.service-card.active {
+  border-color: var(--active-blue);
+  background: #f0f7ff;
+}
+.service-icon {
+  width: 42px; height: 42px; border-radius: 12px; background: #f1f5f9;
+  display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 10px;
+}
+.service-card.active .service-icon { background: var(--primary-blue); color: white; }
+.service-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; color: #0f172a; }
+.service-desc { font-size: 12px; color: var(--text-muted); }
+.badge-extra {
+  position: absolute; top: 10px; right: 10px; background: #ff9800; color: white;
+  font-size: 10px; font-weight: 700; padding: 3px 6px; border-radius: 10px;
+}
+
+.map-box {
+  background: white; border-radius: 16px; padding: 8px; border: 1px solid var(--card-border);
+  margin-bottom: 16px; position: relative;
+}
+.map-instruction {
+  position: absolute; top: 16px; left: 16px; z-index: 1000;
+  background: rgba(255, 255, 255, 0.95); padding: 6px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.1); color: #0264c8;
+}
+#map { height: 230px; border-radius: 12px; z-index: 1; }
+
+.quick-chips {
+  display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px; scrollbar-width: none;
+}
+.quick-chips::-webkit-scrollbar { display: none; }
+.chip {
+  background: #eef4fb; color: #334155; padding: 8px 14px; border-radius: 20px;
+  font-size: 13px; font-weight: 500; white-space: nowrap; border: 1px solid #dce6f2; cursor: pointer;
+}
+
+.form-group { margin-bottom: 14px; }
+.form-label {
+  font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.input-row { display: flex; gap: 8px; }
+.form-input {
+  width: 100%; padding: 13px 16px; border-radius: 12px; border: 1px solid #cbd5e1;
+  background: white; font-size: 14px; outline: none;
+}
+.form-input:focus { border-color: var(--primary-blue); }
+.btn-action {
+  background: #eef4fb; border: 1px solid #cbd5e1; border-radius: 12px; padding: 0 14px;
+  font-size: 16px; cursor: pointer; color: var(--primary-blue); font-weight: bold;
+}
+
+.tariff-card {
+  background: #111827; color: white; border-radius: 20px; padding: 18px 20px;
+  margin-top: 20px; margin-bottom: 16px; box-shadow: 0 10px 25px -5px rgba(17, 24, 39, 0.3);
+}
+.tariff-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.tariff-label { font-size: 12px; color: #9ca3af; }
+.service-badge-dark { background: #1f2937; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; color: #d1d5db; }
+.tariff-price { font-size: 32px; font-weight: 800; margin-bottom: 10px; color: #ffffff; }
+.tariff-footer { display: flex; justify-content: space-between; font-size: 12px; color: #9ca3af; border-top: 1px solid #1f2937; padding-top: 10px; }
+
+.btn-order {
+  width: 100%; background: #f6c38b; color: #ffffff; border: none; padding: 16px;
+  border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 4px 14px rgba(246, 195, 139, 0.4);
+}
 </style>
 </head>
 <body>
+
 <header>
-  <div class="brand">🛵 MAS TOLONG</div>
-  <p>Ojek Serba Bisa — Solusi Cepat, Aman, dan Terpercaya.</p>
-  <p>Kertosono · Jombang · Sekitarnya</p>
-</header>
-<main>
-  <nav>
-    <button class="active" data-page="customer">🙋 Pelanggan</button>
-    <button data-page="driver">🛵 Driver</button>
-    <button data-page="admin">⚙️ Admin demo</button>
-  </nav>
-
-  <section id="customer">
-    <div class="card">
-      <h2>Mau ke mana hari ini?</h2>
-      <div class="services">
-        <button class="service active" data-service="Ojek">🛵 Ojek</button>
-        <button class="service" data-service="Paket">📦 Kirim Paket</button>
-        <button class="service" data-service="Kuliner">🍜 Kuliner / Jastip</button>
-        <button class="service" data-service="Belanja">🛒 Belanja</button>
-      </div>
-      <label for="pickup">Lokasi penjemputan</label>
-      <div class="row"><input id="pickup" placeholder="Contoh: Stasiun Kertosono"><button class="secondary" id="locate">📍</button></div>
-      <label for="destination">Tujuan / alamat pesanan</label>
-      <input id="destination" placeholder="Masukkan alamat tujuan">
-      <button class="secondary" id="routeBtn" style="width:100%;margin-top:10px">🔎 Cari rute & hitung tarif</button>
-      <p class="muted">Tarif dasar Rp6.000 untuk jarak sampai 3 km. Setiap km atau bagian km di atas 3 km ditambah Rp2.500. Jastip Kuliner/Belanja ditambah jasa Rp3.000; harga barang terpisah.</p>
-      <div class="pill" id="routeStatus">Rute belum dihitung</div>
-      <div class="price" id="price">Rp6.000</div>
-      <p class="muted" id="fareDetail">Perkiraan awal saja. Tarif final ditentukan setelah rute berhasil dihitung.</p>
-      <button class="primary" id="book">Buat pesanan DEMO</button>
-    </div>
-    <div class="card">
-      <h2>Peta dan navigasi</h2>
-      <div id="map"></div>
-      <p class="muted">Peta © OpenStreetMap. Rute jalan memakai layanan OSRM publik untuk demonstrasi; layanan ini tidak dijamin selalu tersedia atau cocok untuk semua rute sepeda motor.</p>
-      <button class="primary" id="googleMaps">Buka Google Maps</button>
-    </div>
-    <div class="card">
-      <h2>Status pesanan</h2>
-      <div id="customerOrders" class="muted">Belum ada pesanan demo.</div>
-    </div>
-  </section>
-
-  <section id="driver" class="hidden">
-    <div class="card">
-      <h2>Area Driver</h2>
-      <span class="pill">MODE DEMO — bukan akun driver sungguhan</span>
-      <p class="muted">Pesanan demo yang dibuat di halaman pelanggan akan muncul di sini pada browser yang sama.</p>
-      <button class="secondary" id="shareLocation">📍 Tampilkan lokasi saya di peta</button>
-      <div id="driverOrders"></div>
-    </div>
-  </section>
-
-  <section id="admin" class="hidden">
-    <div class="card">
-      <h2>Panel Admin — Demo</h2>
-      <span class="pill">DATA DEMO LOKAL</span>
-      <p class="muted">Panel ini hanya contoh pengelolaan pesanan pada browser ini. Belum memiliki login aman, server, atau database bersama.</p>
-      <div id="adminStats"></div>
-      <div id="adminOrders"></div>
-      <button class="secondary" id="export">Unduh laporan CSV</button>
-      <button class="secondary" id="resetDemo">Hapus semua data demo</button>
-    </div>
-  </section>
-
-  <div class="card">
-    <h2>Tentang Mas Tolong</h2>
-    <p><b>Didirikan oleh AHMAD ADIP</b></p>
-    <p class="muted">Dusun Bandar RT 01 RW 02, Desa/Kecamatan Bandar Kedungmulyo, Jombang, Jawa Timur.</p>
-    <p class="muted">Visi: menjadi layanan transportasi dan jasa harian lokal yang terpercaya, mudah dijangkau, cepat, dan bermanfaat bagi masyarakat.</p>
+  <div>
+    <div class="brand-title">📍 Mas Tolong</div>
+    <div class="brand-subtitle">Kertosono · Jombang</div>
+    <div class="services-tag">Ojek · Paket · Jastip Kuliner · Belanja Pasar</div>
   </div>
+  <div class="badge-cashless">🛡️ 100% Cashless</div>
+</header>
+
+<main>
+  <div class="section-title">Pilih Layanan</div>
+  <div class="services-grid">
+    <div class="service-card active" onclick="selectService(this, 'Antar Jemput', 0)">
+      <div class="service-icon">🛵</div>
+      <div class="service-name">Antar Jemput</div>
+      <div class="service-desc">Ojek antar jemput penumpang</div>
+    </div>
+    <div class="service-card" onclick="selectService(this, 'Kirim Paket', 0)">
+      <div class="service-icon">📦</div>
+      <div class="service-name">Kirim Paket</div>
+      <div class="service-desc">Antar barang / paket</div>
+    </div>
+    <div class="service-card" onclick="selectService(this, 'Jastip Kuliner', 0)">
+      <div class="service-icon">🍽️</div>
+      <div class="service-name">Jastip Kuliner</div>
+      <div class="service-desc">Jasa titip beli makanan</div>
+    </div>
+    <div class="service-card" onclick="selectService(this, 'Belanja Pasar', 3000)">
+      <span class="badge-extra">+Rp 3.000</span>
+      <div class="service-icon">🛍️</div>
+      <div class="service-name">Belanja Pasar</div>
+      <div class="service-desc">Belanja kebutuhan pasar</div>
+    </div>
+  </div>
+
+  <div class="map-box">
+    <div class="map-instruction" id="mapStatus">Sesuai Rute Jalan Raya Riil</div>
+    <div id="map"></div>
+  </div>
+
+  <div class="quick-chips">
+    <div class="chip" onclick="setQuickPickup('Stasiun Kertosono')">🚂 Stasiun Kertosono</div>
+    <div class="chip" onclick="setQuickPickup('Alun-alun Kertosono')">🌳 Alun-alun Kertosono</div>
+    <div class="chip" onclick="setQuickPickup('Pasar Kertosono')">🛒 Pasar Kertosono</div>
+    <div class="chip" onclick="setQuickPickup('Bandar Kedungmulyo, Jombang')">📍 Bandar Kedungmulyo</div>
+  </div>
+
+  <div class="form-group">
+    <div class="form-label">Nama Anda</div>
+    <input type="text" class="form-input" id="custName" placeholder="cth: Rina">
+  </div>
+
+  <div class="form-group">
+    <div class="form-label"><span>📍 Lokasi Jemput</span></div>
+    <div class="input-row">
+      <input type="text" class="form-input" id="pickupLoc" placeholder="Ketik lokasi jemput (cth: Stasiun Kertosono)">
+      <button class="btn-action" onclick="searchAndRoute('pickup')" title="Cari Lokasi">🔍</button>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="form-label"><span>🎯 Tujuan</span></div>
+    <div class="input-row">
+      <input type="text" class="form-input" id="destLoc" placeholder="Ketik tujuan (cth: Alun-alun Jombang)">
+      <button class="btn-action" onclick="searchAndRoute('destination')" title="Cari Lokasi">🔍</button>
+    </div>
+  </div>
+
+  <!-- Kartu Estimasi Tarif Gelap -->
+  <div class="tariff-card">
+    <div class="tariff-header">
+      <span class="tariff-label">Estimasi Tarif Riil</span>
+      <span class="service-badge-dark" id="badgeServiceLabel">Antar Jemput</span>
+    </div>
+    <div class="tariff-price" id="totalPriceDisplay">Rp 6.000</div>
+    <div class="tariff-footer">
+      <span id="routeInfoText">Menunggu lokasi & rute jalan...</span>
+      <span id="kmDetailDisplay">0.0 km</span>
+    </div>
+  </div>
+
+  <button class="btn-order" onclick="submitOrder()">✨ Pesan Sekarang</button>
 </main>
-<footer>Mas Tolong © 2026 · Versi demonstrasi</footer>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const $=id=>document.getElementById(id);
-let service="Ojek", km=null, fare=6000, routeCoords=null, markers=[];
-const map=L.map("map").setView([-7.60,112.10],10);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
- maxZoom:19,attribution:"© OpenStreetMap contributors"
+let currentService = "Antar Jemput";
+let extraFee = 0;
+let routeKm = 0;
+let startCoords = null;
+let endCoords = null;
+let startMarker = null;
+let endMarker = null;
+let routeLine = null;
+
+// Inisialisasi Peta berpusat di Kertosono/Jombang
+const map = L.map('map').setView([-7.60, 112.10], 11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap contributors'
 }).addTo(map);
-let routeLine=null;
-function money(n){return "Rp"+Math.round(n).toLocaleString("id-ID")}
-function calcFare(distance){
- return 6000+Math.ceil(Math.max(0,distance-3))*2500+
- (["Kuliner","Belanja"].includes(service)?3000:0);
+
+function selectService(element, serviceName, fee) {
+  document.querySelectorAll('.service-card').forEach(c => c.classList.remove('active'));
+  element.classList.add('active');
+  currentService = serviceName;
+  extraFee = fee;
+  document.getElementById('badgeServiceLabel').textContent = serviceName;
+  updateFareDisplay();
 }
-function showFare(){
- $("price").textContent=money(km===null?6000:calcFare(km));
- $("fareDetail").textContent=km===null?
- "Tarif awal, bukan hasil rute otomatis.":
- `Jarak rute ${km.toFixed(1)} km · tarif perjalanan ${money(calcFare(km))}${["Kuliner","Belanja"].includes(service)?" termasuk jasa jastip Rp3.000; harga barang terpisah.":"."}`;
+
+function setQuickPickup(loc) {
+  document.getElementById('pickupLoc').value = loc;
+  searchAndRoute('pickup');
 }
-document.querySelectorAll(".service").forEach(b=>b.onclick=()=>{
- document.querySelectorAll(".service").forEach(x=>x.classList.remove("active"));
- b.classList.add("active");service=b.dataset.service;showFare();
-});
-document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
- document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
- b.classList.add("active");
- ["customer","driver","admin"].forEach(p=>$(p).classList.toggle("hidden",p!==b.dataset.page));
- setTimeout(()=>map.invalidateSize(),150);renderOrders();
-});
-async function geocode(q){
- const url="https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q+", Jawa Timur, Indonesia");
- const r=await fetch(url);if(!r.ok)throw Error("Pencarian alamat gagal");
- const a=await r.json();if(!a.length)throw Error("Alamat tidak ditemukan. Tambahkan nama desa/kecamatan.");
- return [+a[0].lat,+a[0].lon];
+
+async function geocodeAddress(query) {
+  try {
+    let q = query;
+    if (!q.toLowerCase().includes("jawa timur") && !q.toLowerCase().includes("indonesia")) {
+      q += ", Jombang, Jawa Timur, Indonesia";
+    }
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data && data.length > 0) {
+      return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+    }
+    return null;
+  } catch (err) {
+    return null;
+  }
 }
-$("routeBtn").onclick=async()=>{
- const a=$("pickup").value.trim(),b=$("destination").value.trim();
- if(!a||!b){alert("Isi lokasi penjemputan dan tujuan dahulu.");return}
- $("routeStatus").textContent="Mencari alamat dan rute…";
- try{
-  const start=await geocode(a),end=await geocode(b);
-  const url=`https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson`;
-  const response=await fetch(url);if(!response.ok)throw Error("Layanan rute tidak tersedia");
-  const data=await response.json();if(data.code!=="Ok"||!data.routes?.length)throw Error("Rute jalan tidak ditemukan");
-  km=data.routes[0].distance/1000;fare=calcFare(km);
-  routeCoords=[start,end];
-  if(routeLine)map.removeLayer(routeLine);
-  markers.forEach(m=>map.removeLayer(m));markers=[];
-  markers.push(L.marker(start).addTo(map).bindPopup("Penjemputan"));
-  markers.push(L.marker(end).addTo(map).bindPopup("Tujuan"));
-  routeLine=L.geoJSON(data.routes[0].geometry,{style:{color:"#0756c9",weight:5}}).addTo(map);
-  map.fitBounds(routeLine.getBounds(),{padding:[25,25]});
-  $("routeStatus").textContent="Rute berhasil dihitung";
-  showFare();$("fareDetail").textContent=`Jarak jalan ${km.toFixed(2)} km. ${$("fareDetail").textContent}`;
- }catch(e){km=null;routeCoords=null;showFare();$("routeStatus").textContent="Rute belum tersedia";
- alert(e.message+". Periksa koneksi atau coba alamat yang lebih lengkap. Tarif tidak dihitung dari garis lurus.");}
-};
-$("locate").onclick=()=>{
- if(!navigator.geolocation){alert("Browser tidak mendukung lokasi.");return}
- navigator.geolocation.getCurrentPosition(async p=>{
-  const ll=[p.coords.latitude,p.coords.longitude];map.setView(ll,15);
-  markers.forEach(m=>map.removeLayer(m));markers=[L.marker(ll).addTo(map).bindPopup("Lokasi Anda").openPopup()];
-  try{
-   const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${ll[0]}&lon=${ll[1]}`);
-   const d=await r.json();$("pickup").value=d.display_name||ll.join(",");
-  }catch{$("pickup").value=ll.join(",")}
- },()=>alert("Izin lokasi ditolak atau lokasi tidak tersedia."));
-};
-$("googleMaps").onclick=()=>{
- if(!routeCoords){alert("Hitung rute terlebih dahulu.");return}
- const [a,b]=routeCoords;
- location.href=`https://www.google.com/maps/dir/?api=1&origin=${a[0]},${a[1]}&destination=${b[0]},${b[1]}&travelmode=driving`;
-};
-function getOrders(){try{return JSON.parse(localStorage.getItem("masTolongDemoOrders")||"[]")}catch{return []}}
-function saveOrders(o){localStorage.setItem("masTolongDemoOrders",JSON.stringify(o))}
-$("book").onclick=()=>{
- if(!$("pickup").value.trim()||!$("destination").value.trim()){alert("Isi alamat penjemputan dan tujuan.");return}
- if(km===null){alert("Hitung rute berhasil dahulu agar jarak dan tarif tersedia.");return}
- const o=getOrders();o.unshift({id:"DEMO-"+Date.now().toString().slice(-7),service,pickup:$("pickup").value,destination:$("destination").value,km:+km.toFixed(2),fare:calcFare(km),status:"Menunggu (demo)",time:new Date().toLocaleString("id-ID")});
- saveOrders(o);renderOrders();alert("Pesanan demo tersimpan di browser ini. Belum dikirim ke driver sungguhan.");
-};
-function card(o,driver=false){
- return `<div class="order"><b>${o.service} · ${o.id}</b><p class="muted">${o.pickup} → ${o.destination}</p><p>${o.km} km · <b>${money(o.fare)}</b></p><p class="muted">${o.status}</p>${driver&&o.status!=="Selesai (demo)"?`<button class="secondary" onclick="updateOrder('${o.id}')">Terima / Selesaikan</button>`:""}</div>`;
+
+async function searchAndRoute(type) {
+  const pickupVal = document.getElementById('pickupLoc').value.trim();
+  const destVal = document.getElementById('destLoc').value.trim();
+
+  if (type === 'pickup' && pickupVal) {
+    document.getElementById('mapStatus').textContent = "Mencari titik jemput...";
+    startCoords = await geocodeAddress(pickupVal);
+    if (startCoords) {
+      if (startMarker) map.removeLayer(startMarker);
+      startMarker = L.marker(startCoords).addTo(map).bindPopup("Jemput: " + pickupVal);
+      map.setView(startCoords, 13);
+    }
+  }
+
+  if (type === 'destination' && destVal) {
+    document.getElementById('mapStatus').textContent = "Mencari titik tujuan...";
+    endCoords = await geocodeAddress(destVal);
+    if (endCoords) {
+      if (endMarker) map.removeLayer(endMarker);
+      endMarker = L.marker(endCoords).addTo(map).bindPopup("Tujuan: " + destVal);
+    }
+  }
+
+  // Jika kedua titik sudah ada, tarik rute jalan raya riil via OSRM
+  if (startCoords && endCoords) {
+    document.getElementById('mapStatus').textContent = "Menghitung rute jalan raya...";
+    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${startCoords[1]},${startCoords[0]};${endCoords[1]},${endCoords[0]}?overview=full&geometries=geojson`;
+    
+    try {
+      const res = await fetch(osrmUrl);
+      const data = await res.json();
+      if (data.code === "Ok" && data.routes && data.routes.length > 0) {
+        const route = data.routes[0];
+        routeKm = route.distance / 1000; // konversi ke kilometer jalan raya
+        
+        if (routeLine) map.removeLayer(routeLine);
+        routeLine = L.geoJSON(route.geometry, { style: { color: '#0264c8', weight: 5, opacity: 0.8 } }).addTo(map);
+        map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+
+        document.getElementById('mapStatus').textContent = "Rute jalan riil berhasil!";
+        document.getElementById('routeInfoText').textContent = `Jalur jalan raya riil`;
+        updateFareDisplay();
+      }
+    } catch (e) {
+      document.getElementById('mapStatus').textContent = "Gagal memuat rute jalan.";
+    }
+  }
 }
-function updateOrder(id){
- const o=getOrders(),i=o.findIndex(x=>x.id===id);if(i<0)return;
- o[i].status=o[i].status==="Menunggu (demo)"?"Diterima driver (demo)":"Selesai (demo)";
- saveOrders(o);renderOrders();
+
+function updateFareDisplay() {
+  let total = 6000;
+  if (routeKm > 3) {
+    total += Math.ceil(routeKm - 3) * 2500;
+  }
+  total += extraFee;
+
+  document.getElementById('totalPriceDisplay').textContent = "Rp " + total.toLocaleString('id-ID');
+  document.getElementById('kmDetailDisplay').textContent = `${routeKm.toFixed(1)} km`;
 }
-function renderOrders(){
- const o=getOrders();
- $("customerOrders").innerHTML=o.length?o.map(x=>card(x)).join(""):"Belum ada pesanan demo.";
- $("driverOrders").innerHTML=o.length?o.map(x=>card(x,true)).join(""):"Belum ada pesanan demo.";
- $("adminStats").innerHTML=`<p>Total pesanan demo: <b>${o.length}</b></p><p>Nilai tarif tercatat: <b>${money(o.reduce((s,x)=>s+x.fare,0))}</b></p>`;
- $("adminOrders").innerHTML=o.map(x=>card(x)).join("");
+
+function submitOrder() {
+  const name = document.getElementById('custName').value.trim();
+  const pickup = document.getElementById('pickupLoc').value.trim();
+  const dest = document.getElementById('destLoc').value.trim();
+
+  if (!name || !pickup || !dest) {
+    alert("Mohon lengkapi Nama, Lokasi Jemput, dan Tujuan terlebih dahulu.");
+    return;
+  }
+
+  alert(`Pesanan Berhasil dibuat!\n\nNama: ${name}\nLayanan: ${currentService}\nJemput: ${pickup}\nTujuan: ${dest}\nJarak Rute Riil: ${routeKm.toFixed(1)} km\nTotal Tarif: ${document.getElementById('totalPriceDisplay').textContent}`);
 }
-$("shareLocation").onclick=()=>{if(!navigator.geolocation)return alert("Lokasi tidak didukung");navigator.geolocation.getCurrentPosition(p=>{map.setView([p.coords.latitude,p.coords.longitude],15);L.marker([p.coords.latitude,p.coords.longitude]).addTo(map).bindPopup("Lokasi perangkat ini").openPopup();alert("Lokasi ditampilkan di peta perangkat ini saja, belum dibagikan ke server.");},()=>alert("Izin lokasi belum diberikan."));};
-$("export").onclick=()=>{
- const o=getOrders(),rows=[["ID","Layanan","Penjemputan","Tujuan","Jarak km","Tarif","Status"],...o.map(x=>[x.id,x.service,x.pickup,x.destination,x.km,x.fare,x.status])];
- const csv=rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(",")).join("\n");
- const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));a.download="laporan-demo-mas-tolong.csv";a.click();URL.revokeObjectURL(a.href);
-};
-$("resetDemo").onclick=()=>{if(confirm("Hapus semua pesanan DEMO di browser ini?")){saveOrders([]);renderOrders()}};
-showFare();renderOrders();
 </script>
 </body>
 </html>
